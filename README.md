@@ -207,6 +207,7 @@ myproject/
 ---
 
 #### ✅ `migrations/` – *Track & Apply Database Changes*
+**Migration in Django** is the process of propagating changes made to your models (Python classes) into the database schema. Django tracks these changes using special migration files stored in the `migrations/` folder. You create migration files using `python manage.py makemigrations` and apply them to the database using `python manage.py migrate`. This ensures your database structure stays in sync with your model definitions over time.<br>
 
 * Purpose: Stores auto-generated files that represent **schema changes**.
 * Why it's needed:
