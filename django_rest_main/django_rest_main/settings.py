@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     "generics",
     "viewsets",
     "nesteadSerializer",
-    
+    "pagination",
+    "filtering",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -129,3 +131,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+#  This is Global Pagination:
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 3,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'SEARCH_PARAM': 'q',
+    'ORDERING_PARAM': 'order-by',
+}
+

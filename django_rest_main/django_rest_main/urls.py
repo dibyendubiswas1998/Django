@@ -41,4 +41,10 @@ urlpatterns = [
     
     # Work with Nestead Serializers:
     path("api/nestead_serializers/", include("nesteadSerializer.urls")),
+    
+    # Work with Pagination:
+    path("api/pagination/", include("pagination.urls")),
+    
+    # Work with Filtering:
+    path("api/filtering/", include("filtering.urls")),
 ]

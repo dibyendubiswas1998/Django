@@ -426,3 +426,216 @@ If you want to **create/update nested models**, you need to override `create()` 
 | --------------------- | --------------------------------------- | ------------------------------------------- |
 | **Router**            | Automatically creates URLs for viewsets | `DefaultRouter().register()`                |
 | **Nested Serializer** | Embed related models in API response    | `StudentSerializer` with `CourseSerializer` |
+
+
+
+
+
+## 🔹 10. **Pagination in Django REST Framework**
+
+Pagination is used to **break up large result sets** into manageable "pages" so that your API doesn't return too much data at once.
+
+DRF supports various pagination styles like:
+
+* `PageNumberPagination`
+* `LimitOffsetPagination`
+
+---
+
+### ✅ A. **PageNumberPagination**
+
+Returns results **page by page** (like page 1, 2, 3...).
+
+#### 🔸 Configuration:
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5
+}
+```
+
+#### 🔸 Example API call:
+
+```http
+GET /students/?page=2
+```
+
+#### 🔸 Output:
+
+```json
+{
+  "count": 20,
+  "next": "http://api.example.org/students/?page=3",
+  "previous": "http://api.example.org/students/?page=1",
+  "results": [
+    {"id": 6, "name": "John"},
+    ...
+  ]
+}
+```
+
+
+### ✅ B. **LimitOffsetPagination**
+
+Uses **`limit`** and **`offset`** query params.
+
+* **`limit`** = number of items per page.
+* **`offset`** = starting index of records.
+
+#### 🔸 Configuration:
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5
+}
+```
+
+#### 🔸 Example API call:
+
+```http
+GET /students/?limit=3&offset=6
+```
+
+* This returns **3 items**, starting from the **7th record (offset 6)**.
+
+#### 🔸 Output:
+
+```json
+{
+  "count": 20,
+  "next": "http://api.example.org/students/?limit=3&offset=9",
+  "previous": "http://api.example.org/students/?limit=3&offset=3",
+  "results": [...]
+}
+```
+
+---
+
+## 🔹 11. **Filtering in Django REST Framework**
+
+Filtering is used to **narrow down querysets** based on client parameters.
+
+DRF supports:
+
+* Custom Filters (via `DjangoFilterBackend`)
+* Search Filter
+* Ordering Filter
+
+
+
+### ✅ A. **Custom Filter (DjangoFilterBackend)**
+
+Filter by specific fields using query params.
+
+#### 🔸 Install and configure:
+
+```bash
+pip install django-filter
+```
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+```
+
+#### 🔸 views.py
+
+```python
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentListView(generics.ListAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'course']
+```
+
+#### 🔸 Example API:
+
+```
+GET /students/?name=John&course=Math
+```
+
+---
+
+### ✅ B. **SearchFilter**
+
+Used for simple keyword search across one or more fields.
+
+#### 🔸 views.py
+
+```python
+from rest_framework.filters import SearchFilter
+
+class StudentListView(generics.ListAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'course__name']
+```
+
+#### 🔸 Example API:
+
+```
+GET /students/?search=John
+```
+
+
+
+### ✅ C. **OrderingFilter**
+
+Allows client to sort the results.
+
+#### 🔸 views.py
+
+```python
+from rest_framework.filters import OrderingFilter
+
+class StudentListView(generics.ListAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['name', 'id']
+```
+
+#### 🔸 Example API:
+
+```
+GET /students/?ordering=name
+GET /students/?ordering=-id
+```
+
+---
+
+### ✅ D. **Combined Filters**
+
+```python
+filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+```
+
+Now you can:
+
+```
+GET /students/?search=John&course=Math&ordering=name
+```
+
+
+
+## 🔄 Summary Table
+
+| Feature               | Purpose                   | Example              |
+| --------------------- | ------------------------- | -------------------- |
+| PageNumberPagination  | Page-based navigation     | `?page=2`            |
+| LimitOffsetPagination | Custom limits/offsets     | `?limit=5&offset=10` |
+| Custom Filter         | Filter by specific fields | `?name=John`         |
+| Search Filter         | Keyword search            | `?search=math`       |
+| Ordering Filter       | Sort results              | `?ordering=name`     |
