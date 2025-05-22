@@ -2,3 +2,4 @@ Django
 django-tailwind
 django-tailwind[reload]
 djangorestframework
+django-filter
