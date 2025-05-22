@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from .models import Tweet
-from .forms import TweetForms
+from .forms import TweetForms, UserRegistrationForm
 from django.shortcuts import get_object_or_404, redirect
-
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 
 def index(request):
     return render(request, 'index.html')
@@ -15,6 +16,7 @@ def tweet_list(request):
 
 
 # Create Tweet
+@login_required # make authenticate
 def tweet_create(request):
     if request.method == 'POST':
         form = TweetForms(request.POST, request.FILES)
@@ -31,6 +33,7 @@ def tweet_create(request):
 
 
 # Edit Tweet
+@login_required # make authenticate
 def tweet_edit(request, tweet_id):
     tweet = get_object_or_404(Tweet,  pk=tweet_id, user=request.user) # access by particular user
     
@@ -50,6 +53,7 @@ def tweet_edit(request, tweet_id):
 
 
 # Delete Tweet:
+@login_required # make authenticate
 def tweet_delete(request, tweet_id):
     tweet = get_object_or_404(Tweet,  pk=tweet_id, user=request.user) # access by particular user
     
@@ -58,3 +62,23 @@ def tweet_delete(request, tweet_id):
         return redirect('tweet_list')
     
     return render(request, 'tweet_confirm_delete.html', {'tweet': tweet})
+
+
+
+# User Registration:
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password1']) # set the cleaned password1 
+            user.save() #save the data:
+            login(request, user)
+            
+            return redirect('tweet_list')
+    
+    else:
+        form = UserRegistrationForm()
+    
+    
+    return render(request, 'regustration/register.html', {'form':form})
